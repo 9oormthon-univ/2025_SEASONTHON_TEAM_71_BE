@@ -60,6 +60,13 @@ dependencies {
     annotationProcessor "com.querydsl:querydsl-apt:${dependencyManagement.importedProperties['querydsl.version']}:jakarta"
     annotationProcessor "jakarta.persistence:jakarta.persistence-api"
     annotationProcessor "jakarta.annotation:jakarta.annotation-api"
+
+    // google vertex ai
+    implementation 'com.google.cloud:google-cloud-vertexai:1.33.0'
+
+    // google document ai
+    implementation(platform("com.google.cloud:libraries-bom:26.66.0"))
+    implementation("com.google.cloud:google-cloud-document-ai")
 }
 
 tasks.named('test') {
