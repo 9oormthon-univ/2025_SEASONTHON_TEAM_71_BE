@@ -1,4 +1,3 @@
 package goormton.team.gotjob.domain.bookmark.dto;
 
-public class BookmarkResponse {
-}
+public record BookmarkResponse(Long jobId, String jobTitle, String companyName, String createdAt) {}

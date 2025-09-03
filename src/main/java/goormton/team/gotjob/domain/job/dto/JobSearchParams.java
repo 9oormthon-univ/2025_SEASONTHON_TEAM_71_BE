@@ -1,4 +1,6 @@
 package goormton.team.gotjob.domain.job.dto;
 
-public class JobSearchParams {
-}
+import java.util.List;
+
+public record JobSearchParams(String q, String location, List<String> skills,
+                              Integer page, Integer size) {}

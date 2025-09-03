@@ -1,4 +1,3 @@
 package goormton.team.gotjob.domain.job.dto;
 
-public class CompanySummary {
-}
+public record CompanySummary(Long id, String name) {}

@@ -1,4 +1,4 @@
 package goormton.team.gotjob.domain.user.dto;
 
-public class SignupRequest {
-}
+public record SignupRequest(String username, String password, String email,
+                            String realName, String phone, String role) {}

@@ -1,4 +1,3 @@
 package goormton.team.gotjob.domain.application.dto;
 
-public class ApplyRequest {
-}
+public record ApplyRequest(String coverLetter, String resumeUrlSnapshot) {}

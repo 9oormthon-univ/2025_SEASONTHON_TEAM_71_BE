@@ -1,4 +1,3 @@
 package goormton.team.gotjob.domain.application.dto;
 
-public class ApplicationStatusUpdateRequest {
-}
+public record ApplicationStatusUpdateRequest(String status) {}

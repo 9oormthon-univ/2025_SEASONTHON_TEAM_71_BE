@@ -1,4 +1,3 @@
 package goormton.team.gotjob.domain.user.dto;
 
-public class TokenResponse {
-}
+public record TokenResponse(String accessToken, String tokenType, long expiresIn) {}

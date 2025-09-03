@@ -1,4 +1,3 @@
 package goormton.team.gotjob.domain.consultant.dto;
 
-public class ConsultantMatchUpdateRequest {
-}
+public record ConsultantMatchUpdateRequest(String status) {}
