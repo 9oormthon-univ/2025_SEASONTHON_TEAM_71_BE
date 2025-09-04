@@ -4,7 +4,10 @@ import goormton.team.gotjob.domain.user.dto.*;
 import goormton.team.gotjob.domain.common.ApiResponse;
 import goormton.team.gotjob.domain.user.service.AuthService;
 import goormton.team.gotjob.domain.user.service.UserService;
+import goormton.team.gotjob.global.security.CustomUserDetails;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -12,7 +15,7 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class UserController {
     private final AuthService auth;
-    private final UserService usersvc;
+    private final UserService userService;
 
     @PostMapping("/auth/signup")
     public ApiResponse<SignupResponse> signup(@RequestBody SignupRequest req){ return ApiResponse.ok(auth.signup(req)); }
@@ -20,10 +23,17 @@ public class UserController {
     @PostMapping("/auth/login")
     public ApiResponse<TokenResponse> login(@RequestBody LoginRequest req){ return ApiResponse.ok(auth.login(req)); }
 
-    @GetMapping("/users/me")
-    public ApiResponse<MeResponse> me(){ return ApiResponse.ok(usersvc.me(1L)); } // TODO JWT 붙이면 교체
+    @PreAuthorize("isAuthenticated()")
+    @GetMapping("/me")
+    public ApiResponse<MeResponse> me(@AuthenticationPrincipal CustomUserDetails me){
+        return ApiResponse.ok(userService.me(me.id()));
+    }
 
-    @PutMapping("/users/me")
-    public ApiResponse<MeResponse> updateMe(@RequestBody UpdateMeRequest req){ return ApiResponse.ok(usersvc.update(1L, req)); }
+    @PreAuthorize("isAuthenticated()")
+    @PutMapping("/me")
+    public ApiResponse<MeResponse> updateMe(@RequestBody UpdateMeRequest req,
+                                            @AuthenticationPrincipal CustomUserDetails me){
+        return ApiResponse.ok(userService.update(me.id(), req));
+    }
 
 }
