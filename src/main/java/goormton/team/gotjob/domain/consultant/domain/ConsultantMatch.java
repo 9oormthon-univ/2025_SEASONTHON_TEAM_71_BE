@@ -8,6 +8,7 @@ import lombok.*;
 @Entity
 @Table(name="consultant_matches",
         uniqueConstraints=@UniqueConstraint(columnNames={"consultant_id","user_id"}))
+@AttributeOverride(name = "status", column = @Column(name = "row_status"))
 @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
 public class ConsultantMatch extends BaseEntity {
     @Id @GeneratedValue(strategy=GenerationType.IDENTITY)

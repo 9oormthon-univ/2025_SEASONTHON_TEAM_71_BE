@@ -8,6 +8,7 @@ import lombok.*;
 @Entity
 @Getter @Setter
 @Table(name = "users")
+@AttributeOverride(name = "status", column = @Column(name = "row_status"))
 @NoArgsConstructor @AllArgsConstructor @Builder
 public class User extends BaseEntity {
     @Id

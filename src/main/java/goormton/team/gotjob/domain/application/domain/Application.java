@@ -7,6 +7,7 @@ import lombok.*;
 
 @Entity
 @Table(name="applications", uniqueConstraints=@UniqueConstraint(columnNames={"user_id","job_id"}))
+@AttributeOverride(name = "status", column = @Column(name = "row_status"))
 @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
 public class Application extends BaseEntity {
     @Id @GeneratedValue(strategy=GenerationType.IDENTITY)

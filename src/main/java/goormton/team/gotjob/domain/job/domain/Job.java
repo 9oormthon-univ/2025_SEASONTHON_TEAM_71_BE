@@ -8,6 +8,7 @@ import lombok.*;
 import java.time.LocalDate;
 
 @Entity @Table(name="jobs")
+@AttributeOverride(name = "status", column = @Column(name = "row_status"))
 @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
 public class Job extends BaseEntity {
     @Id @GeneratedValue(strategy=GenerationType.IDENTITY)
