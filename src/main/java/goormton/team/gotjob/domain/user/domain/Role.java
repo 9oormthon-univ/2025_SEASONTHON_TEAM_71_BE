@@ -1,4 +1,3 @@
 package goormton.team.gotjob.domain.user.domain;
 
-public class Role {
-}
+public enum Role { PERSONAL, COMPANY, CONSULTANT}
