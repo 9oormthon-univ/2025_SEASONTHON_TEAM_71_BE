@@ -1,39 +1,32 @@
 package goormton.team.gotjob.domain.application.controller;
 
 import goormton.team.gotjob.domain.application.dto.*;
+import goormton.team.gotjob.domain.application.service.ApplicationService;
 import goormton.team.gotjob.domain.common.ApiResponse;
+import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
 @RequestMapping("/api")
+@RequiredArgsConstructor
 public class ApplicationController {
+    private final ApplicationService svc;
 
     @PostMapping("/jobs/{id}/apply")
-    public ApiResponse<ApplicationResponse> apply(@PathVariable Long id, @RequestBody ApplyRequest req) {
-        return ApiResponse.ok(new ApplicationResponse(1L, 1L, "차현",
-                id, "백엔드 개발자", "네이버", "APPLIED", "2025-09-01"));
+    public ApiResponse<ApplicationResponse> apply(@PathVariable Long id, @RequestBody ApplyRequest req){
+        return ApiResponse.ok(svc.apply(1L, id, req)); // 임시 userId=1
     }
 
     @GetMapping("/applications/me")
-    public ApiResponse<List<ApplicationResponse>> myApplications() {
-        return ApiResponse.ok(List.of(new ApplicationResponse(1L, 1L, "차현",
-                1L, "백엔드 개발자", "네이버", "APPLIED", "2025-09-01")));
-    }
+    public ApiResponse<List<ApplicationResponse>> myApplications(){ return ApiResponse.ok(svc.myApplications(1L)); }
 
     @GetMapping("/jobs/{id}/applications")
-    public ApiResponse<List<ApplicationResponse>> listApplicants(@PathVariable Long id) {
-        return ApiResponse.ok(List.of(
-                new ApplicationResponse(11L, 101L, "지원자A", id, "백엔드", "네이버", "REVIEWING", "2025-09-01"),
-                new ApplicationResponse(12L, 102L, "지원자B", id, "백엔드", "네이버", "APPLIED", "2025-09-02")
-        ));
-    }
+    public ApiResponse<List<ApplicationResponse>> applicants(@PathVariable Long id){ return ApiResponse.ok(svc.applicants(id)); }
 
     @PatchMapping("/applications/{id}")
-    public ApiResponse<ApplicationResponse> updateStatus(@PathVariable Long id,
-                                                         @RequestBody ApplicationStatusUpdateRequest req) {
-        return ApiResponse.ok(new ApplicationResponse(id, 1L, "차현",
-                1L, "백엔드 개발자", "네이버", req.status(), "2025-09-01"));
+    public ApiResponse<ApplicationResponse> updateStatus(@PathVariable Long id, @RequestBody ApplicationStatusUpdateRequest req){
+        return ApiResponse.ok(svc.updateStatus(id, req));
     }
 }
