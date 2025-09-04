@@ -7,7 +7,10 @@ import com.google.cloud.documentai.v1.ProcessResponse;
 import com.google.protobuf.ByteString;
 import goormton.team.gotjob.domain.documentAi.dto.response.DocumentAiKeywordsResponse;
 import goormton.team.gotjob.domain.documentAi.dto.response.DocumentAiSummaryResponse;
+import goormton.team.gotjob.global.error.DefaultException;
+import goormton.team.gotjob.global.payload.ErrorCode;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,18 +28,30 @@ public class DocumentAiService {
 
     private final DocumentProcessorServiceClient docAiClient;
 
-    public Map<DocumentAiSummaryResponse, List<DocumentAiKeywordsResponse>> getDocumentSummary(byte[] fileData, String projectId, String location, String summarizerId, String extractorId) {
+    @Value("${gcp.project-id}")
+    private String projectId;
+
+    @Value("${gcp.location}")
+    private String location;
+
+    @Value("${gcp.processor.summarizer-id}")
+    private String summarizerId;
+
+    @Value("${gcp.processor.extractor-id}")
+    private String extractorId;
+
+    public Map<DocumentAiSummaryResponse, List<DocumentAiKeywordsResponse>> getDocumentSummaryAndExtract(byte[] fileData) {
         // 두 작업을 비동기로 동시에 실행하여 속도 향상
-        CompletableFuture<String> summaryFuture = CompletableFuture.supplyAsync(() ->
-                summarizeWithBuiltInProcessor(fileData, projectId, location, summarizerId)
+        CompletableFuture<DocumentAiSummaryResponse> summaryFuture = CompletableFuture.supplyAsync(() ->
+                summarizeWithBuiltInProcessor(fileData)
         );
 
         CompletableFuture<List<DocumentAiKeywordsResponse>> extractionFuture = CompletableFuture.supplyAsync(() ->
-                extractKeywardsWithWeights(fileData, projectId, location, extractorId)
+                extractKeywardsWithWeights(fileData)
         );
 
         // 두 작업이 모두 끝날 때까지 기다린 후 결과 조합
-        DocumentAiSummaryResponse summary = new DocumentAiSummaryResponse(summaryFuture.join());
+        DocumentAiSummaryResponse summary = summaryFuture.join();
         List<DocumentAiKeywordsResponse> extractedData = extractionFuture.join();
 
         Map<DocumentAiSummaryResponse, List<DocumentAiKeywordsResponse>> result = new HashMap<>();
@@ -48,13 +63,10 @@ public class DocumentAiService {
     /**
      * Document AI의 내장 Summarizer 프로세서를 사용하여 PDF를 요약합니다.
      * @param fileData PDF 파일 바이트 배열
-     * @param projectId GCP 프로젝트 ID
-     * @param location 프로세서 리전 (예: "us")
-     * @param summarizerProcessorId 생성한 Document Summarizer 프로세서 ID
      * @return 요약된 텍스트
      */
-    public String summarizeWithBuiltInProcessor(byte[] fileData, String projectId, String location, String summarizerProcessorId) {
-        String processorName = String.format("projects/%s/locations/%s/processors/%s", projectId, location, summarizerProcessorId);
+    public DocumentAiSummaryResponse summarizeWithBuiltInProcessor(byte[] fileData) {
+        String processorName = String.format("projects/%s/locations/%s/processors/%s", projectId, location, summarizerId);
 
         ProcessRequest request = ProcessRequest.newBuilder()
                 .setName(processorName)
@@ -74,15 +86,16 @@ public class DocumentAiService {
                 .collect(Collectors.toList());
 
         if (summaries.isEmpty()) {
-            return "요약 내용을 찾을 수 없습니다.";
+            throw new DefaultException(ErrorCode.INVALID_DOCUMENTAI_SUMMARY);
         }
 
         // 여러 개의 요약이 있을 경우 모두 합쳐서 반환
-        return String.join("\n", summaries);
+        String response = String.join("\n", summaries);
+        return new DocumentAiSummaryResponse(response);
     }
 
-    public List<DocumentAiKeywordsResponse> extractKeywardsWithWeights(byte[] fileData, String projectId, String location, String customProcessorId) {
-        String processorName = String.format("projects/%s/locations/%s/processors/%s", projectId, location, customProcessorId);
+    public List<DocumentAiKeywordsResponse> extractKeywardsWithWeights(byte[] fileData) {
+        String processorName = String.format("projects/%s/locations/%s/processors/%s", projectId, location, extractorId);
 
         ProcessRequest request = ProcessRequest.newBuilder()
                 .setName(processorName)
@@ -109,6 +122,10 @@ public class DocumentAiService {
 
             // 4. DTO 객체를 만들어 리스트에 추가
             keywords.add(new DocumentAiKeywordsResponse(term, weight));
+        }
+
+        if (keywords.isEmpty()) {
+            throw new DefaultException(ErrorCode.INVALID_DOCUMENTAI_KEYWORDS_EXTRACT);
         }
 
         return keywords;
