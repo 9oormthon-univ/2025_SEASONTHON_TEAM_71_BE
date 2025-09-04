@@ -10,7 +10,8 @@ import java.time.LocalDate;
 @Entity @Table(name="jobs")
 @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
 public class Job extends BaseEntity {
-    @Id @GeneratedValue(strategy=GenerationType.IDENTITY) private Long id;
+    @Id @GeneratedValue(strategy=GenerationType.IDENTITY)
+    private Long id;
 
     @ManyToOne(fetch=FetchType.LAZY) @JoinColumn(name="company_id")
     private Company company;
@@ -22,6 +23,8 @@ public class Job extends BaseEntity {
     private Integer maxSalary;
     @Lob private String requirements;
     @Lob private String description;
-    private String status = "OPEN";
+
+    @Column(name = "status")
+    private String jobStatus = "OPEN";
     private LocalDate deadline;
 }

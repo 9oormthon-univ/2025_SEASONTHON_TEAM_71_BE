@@ -24,7 +24,7 @@ public class JobService {
                 .location(req.location()).minSalary(req.minSalary()).maxSalary(req.maxSalary())
                 .requirements(req.requirements()).description(req.description())
                 .deadline(req.deadline()!=null? java.time.LocalDate.parse(req.deadline()) : null)
-                .status("OPEN").build();
+                .jobStatus("OPEN").build();
         jobs.save(j);
         return toDto(j);
     }
@@ -39,7 +39,7 @@ public class JobService {
         j.setLocation(req.location()); j.setMinSalary(req.minSalary()); j.setMaxSalary(req.maxSalary());
         j.setRequirements(req.requirements()); j.setDescription(req.description());
         j.setDeadline(req.deadline()!=null? java.time.LocalDate.parse(req.deadline()) : null);
-        j.setStatus(req.status());
+        j.setJobStatus(req.status());
         return toDto(j);
     }
 
@@ -54,7 +54,7 @@ public class JobService {
     private JobResponse toDto(Job j){
         return new JobResponse(j.getId(), j.getTitle(), j.getEmploymentType(), j.getLocation(),
                 j.getMinSalary(), j.getMaxSalary(), j.getRequirements(), j.getDescription(),
-                j.getStatus(), j.getDeadline()!=null? j.getDeadline().toString():null,
+                j.getJobStatus(), j.getDeadline()!=null? j.getDeadline().toString():null,
                 new CompanySummary(j.getCompany().getId(), j.getCompany().getName()));
     }
 }
