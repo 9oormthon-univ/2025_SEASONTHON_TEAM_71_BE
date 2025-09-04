@@ -20,5 +20,4 @@ public class ApiResponse {
         this.check = check;
         this.information = information;
     }
-
 }
