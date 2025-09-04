@@ -32,6 +32,7 @@ public class User extends BaseEntity {
     @Enumerated(EnumType.STRING) @Column(nullable=false)
     private Role role;
 
+    @Builder.Default
     @Enumerated(EnumType.STRING) @Column(nullable=false)
     private UserStatus userStatus = UserStatus.ACTIVE;
 

@@ -24,6 +24,7 @@ public class Job extends BaseEntity {
     @Lob private String requirements;
     @Lob private String description;
 
+    @Builder.Default
     @Column(name = "status")
     private String jobStatus = "OPEN";
     private LocalDate deadline;

@@ -45,7 +45,7 @@ public class ApplicationService {
     @Transactional
     public ApplicationResponse updateStatus(Long id, ApplicationStatusUpdateRequest req){
         var a = applications.findById(id).orElseThrow(()->new ApiException(404,"application not found"));
-        a.setStatus(req.status());
+        a.setApplicationStatus(req.status());
         return toDto(a);
     }
 
@@ -53,6 +53,6 @@ public class ApplicationService {
         var fmt = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
         return new ApplicationResponse(a.getId(), a.getUser().getId(), a.getUser().getRealName(),
                 a.getJob().getId(), a.getJob().getTitle(), a.getJob().getCompany().getName(),
-                a.getStatus(), a.getCreatedAt()!=null?a.getCreatedAt().format(fmt):null);
+                a.getApplicationStatus(), a.getCreatedAt()!=null?a.getCreatedAt().format(fmt):null);
     }
 }

@@ -24,7 +24,7 @@ public class ConsultantMatchService {
         User c = users.findById(req.consultantId()).orElseThrow(()->new ApiException(404,"consultant not found"));
         User u = users.findById(req.userId()).orElseThrow(()->new ApiException(404,"user not found"));
         matches.findByConsultantAndUser(c,u).ifPresent(m->{ throw new ApiException(409,"already matched"); });
-        var m = matches.save(ConsultantMatch.builder().consultant(c).user(u).status("ACTIVE").note(req.note()).build());
+        var m = matches.save(ConsultantMatch.builder().consultant(c).user(u).matchStatus("ACTIVE").note(req.note()).build());
         return toDto(m);
     }
 
@@ -38,12 +38,12 @@ public class ConsultantMatchService {
     @Transactional
     public ConsultantMatchResponse update(Long id, ConsultantMatchUpdateRequest req){
         var m = matches.findById(id).orElseThrow(()->new ApiException(404,"match not found"));
-        m.setStatus(req.status());
+        m.setMatchStatus(req.status());
         return toDto(m);
     }
 
     private ConsultantMatchResponse toDto(ConsultantMatch m){
         var ts = m.getCreatedAt()!=null? m.getCreatedAt().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME):null;
-        return new ConsultantMatchResponse(m.getId(), m.getConsultant().getId(), m.getUser().getId(), m.getStatus(), m.getNote(), ts);
+        return new ConsultantMatchResponse(m.getId(), m.getConsultant().getId(), m.getUser().getId(), m.getMatchStatus(), m.getNote(), ts);
     }
 }

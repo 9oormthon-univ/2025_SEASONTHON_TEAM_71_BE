@@ -19,6 +19,9 @@ public class ConsultantMatch extends BaseEntity {
     @ManyToOne(fetch=FetchType.LAZY) @JoinColumn(name="user_id")
     private User user;
 
-    private String status = "ACTIVE";
+    @Builder.Default
+    @Column(name = "status")
+    private String matchStatus = "ACTIVE";
+
     @Lob private String note;
 }

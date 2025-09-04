@@ -18,7 +18,10 @@ public class Application extends BaseEntity {
     @ManyToOne(fetch=FetchType.LAZY) @JoinColumn(name="job_id")
     private Job job;
 
-    private String status = "APPLIED"; // APPLIED, REVIEWING, INTERVIEW, OFFER, REJECTED, WITHDRAWN
+    @Builder.Default
+    @Column(name = "status")
+    private String applicationStatus = "APPLIED"; // APPLIED, REVIEWING, INTERVIEW, OFFER, REJECTED, WITHDRAWN
+
     @Lob private String coverLetter;
     private String resumeUrlSnapshot;
 }
