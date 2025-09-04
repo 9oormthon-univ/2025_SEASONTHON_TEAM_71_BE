@@ -33,7 +33,7 @@ public class User extends BaseEntity {
     private Role role;
 
     @Enumerated(EnumType.STRING) @Column(nullable=false)
-    private UserStatus status = UserStatus.ACTIVE;
+    private UserStatus userStatus = UserStatus.ACTIVE;
 
     @OneToOne(mappedBy="user", cascade=CascadeType.ALL, orphanRemoval=true, fetch=FetchType.LAZY)
     private UserProfile profile;
