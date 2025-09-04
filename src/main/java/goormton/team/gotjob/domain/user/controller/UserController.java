@@ -2,7 +2,6 @@ package goormton.team.gotjob.domain.user.controller;
 
 import goormton.team.gotjob.domain.user.dto.*;
 import goormton.team.gotjob.domain.common.ApiResponse;
-import goormton.team.gotjob.domain.user.service.AuthService;
 import goormton.team.gotjob.domain.user.service.UserService;
 import goormton.team.gotjob.global.security.CustomUserDetails;
 import lombok.RequiredArgsConstructor;
@@ -14,26 +13,18 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api")
 @RequiredArgsConstructor
 public class UserController {
-    private final AuthService auth;
-    private final UserService userService;
-
-    @PostMapping("/auth/signup")
-    public ApiResponse<SignupResponse> signup(@RequestBody SignupRequest req){ return ApiResponse.ok(auth.signup(req)); }
-
-    @PostMapping("/auth/login")
-    public ApiResponse<TokenResponse> login(@RequestBody LoginRequest req){ return ApiResponse.ok(auth.login(req)); }
+    private final UserService usersvc;
 
     @PreAuthorize("isAuthenticated()")
-    @GetMapping("/me")
+    @GetMapping("/users/me")
     public ApiResponse<MeResponse> me(@AuthenticationPrincipal CustomUserDetails me){
-        return ApiResponse.ok(userService.me(me.id()));
+        return ApiResponse.ok(usersvc.me(me.id()));
     }
 
     @PreAuthorize("isAuthenticated()")
-    @PutMapping("/me")
+    @PutMapping("/users/me")
     public ApiResponse<MeResponse> updateMe(@RequestBody UpdateMeRequest req,
                                             @AuthenticationPrincipal CustomUserDetails me){
-        return ApiResponse.ok(userService.update(me.id(), req));
+        return ApiResponse.ok(usersvc.update(me.id(), req));
     }
-
 }
