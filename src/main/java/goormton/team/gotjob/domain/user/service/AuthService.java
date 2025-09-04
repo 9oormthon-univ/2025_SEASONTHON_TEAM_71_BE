@@ -24,7 +24,7 @@ public class AuthService {
         var u = User.builder()
                 .username(req.username()).password(encoder.encode(req.password()))
                 .email(req.email()).realName(req.realName()).phone(req.phone())
-                .role(Role.valueOf(req.role())).status(UserStatus.ACTIVE).build();
+                .role(Role.valueOf(req.role())).userStatus(UserStatus.ACTIVE).build();
         users.save(u);
 
         var p = UserProfile.builder().user(u).build();
