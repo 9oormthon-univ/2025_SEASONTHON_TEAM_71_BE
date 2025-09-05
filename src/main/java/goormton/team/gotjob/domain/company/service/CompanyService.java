@@ -17,6 +17,9 @@ public class CompanyService {
     @Transactional
     public CompanyResponse create(Long ownerUserId, CompanyCreateRequest req){
         var owner = users.findById(ownerUserId).orElseThrow(()->new ApiException(404,"owner not found"));
+        if (companies.existsByBusinessNo(req.businessNo())) {
+            throw new ApiException(409, "business_number already exists");
+        }
         var c = Company.builder()
                 .name(req.name()).businessNo(req.businessNo()).description(req.description())
                 .size(req.size()).website(req.website()).address(req.address())
