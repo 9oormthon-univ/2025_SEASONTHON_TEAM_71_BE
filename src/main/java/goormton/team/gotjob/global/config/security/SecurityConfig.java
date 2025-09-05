@@ -2,6 +2,8 @@ package goormton.team.gotjob.global.config.security;
 
 import goormton.team.gotjob.global.security.*;
 import lombok.RequiredArgsConstructor;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -18,7 +20,8 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 @Configuration
 @EnableWebSecurity
@@ -43,11 +46,30 @@ public class SecurityConfig {
     };
 
     @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration cfg = new CorsConfiguration();
+        // application.yml 값 반영이 어렵다면, 바로 하드코딩도 가능:
+        cfg.setAllowedOrigins(java.util.List.of(
+                "http://localhost:3000",
+                "http://localhost:8080",
+                "http://13.125.205.40:8080",
+                "http://localhost:5173"
+        ));
+        cfg.setAllowedMethods(java.util.List.of("GET","POST","PUT","PATCH","DELETE","OPTIONS"));
+        cfg.setAllowedHeaders(java.util.List.of("*"));
+        cfg.setAllowCredentials(true);
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", cfg);
+        return source;
+    }
+
+    @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
         http
 //                cors 설정
-                .cors(Customizer.withDefaults())
+                .cors(c -> c.configurationSource(corsConfigurationSource()))
 //                crsf disable
                 .csrf(AbstractHttpConfigurer::disable)
 //                Form 로그인 방식 disable
@@ -64,6 +86,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests((auth) -> auth
 //                              미리 정의된 whitelist 경로는 모두 허용
                                 .requestMatchers(AUTH_WHITELIST).permitAll()
+                                .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 //                              모든 get method는 허용
                                 .requestMatchers(HttpMethod.GET, "/**").permitAll()
 //                              유저 인증용 post method는 인증 없이 허용
