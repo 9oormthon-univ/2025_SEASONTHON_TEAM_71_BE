@@ -1,3 +1,5 @@
 package goormton.team.gotjob.domain.user.domain;
 
-public enum Role { PERSONAL, COMPANY, CONSULTANT}
+public enum Role {
+    PERSONAL, COMPANY, CONSULTANT//,ADMIN
+}
