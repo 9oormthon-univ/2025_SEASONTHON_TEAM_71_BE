@@ -1,0 +1,69 @@
+### 1) API 문서 핑 (올바른 경로)
+GET http://localhost:8080/v3/api-docs
+Accept: application/json
+
+###
+
+# 2) 회원가입 (한 번만)
+POST http://localhost:8080/api/auth/signup
+Content-Type: application/json
+
+{
+  "username": "tester01",
+  "password": "pass1234!",
+  "email": "tester01@example.com",
+  "realName": "테스터원",
+  "phone": "010-0000-0001",
+  "role": "PERSONAL"
+}
+
+###
+
+# 3) 로그인 → accessToken 저장
+POST http://localhost:8080/api/auth/login
+Content-Type: application/json
+
+{
+  "username": "tester01",
+  "password": "pass1234!"
+}
+
+> {%
+    // JetBrains HTTP Client script
+    const body = JSON.parse(response.body);
+    const token = body?.data?.accessToken || body?.accessToken;
+    if (token) {
+        client.global.set("accessToken", token);
+        client.log("✅ accessToken saved");
+    } else {
+        client.log("⚠️ accessToken not found. Check response shape.");
+    }
+%}
+
+###
+
+# 4a) (검증) 토큰 없이 내 정보 → 401
+GET http://localhost:8080/api/users/me
+Accept: application/json
+
+###
+
+# 4b) 토큰 넣고 내 정보 → 200
+GET http://localhost:8080/api/users/me
+Accept: application/json
+Authorization: Bearer {{accessToken}}
+
+###
+
+# 5) 내 정보 수정(보호됨)
+PUT http://localhost:8080/api/users/me
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+  "bio": "안녕하세요! 5년차 백엔드 개발자",
+  "yearsExperience": 5,
+  "location": "Seoul",
+  "resumeUrl": "https://my.cdn/resume.pdf",
+  "portfolioUrl": "https://my.site"
+}
