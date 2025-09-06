@@ -66,6 +66,8 @@ jobs:
   run-docker-image-on-ec2:
     needs: build-docker-image
     runs-on: self-hosted
+    env:
+      GCP_KEY_JSON: ${{ secrets.GCP_SA_KEY }}
 
     steps:
       # 1. 최신 이미지를 풀받습니다
@@ -78,7 +80,9 @@ jobs:
 
       # 3. 최신 이미지를 컨테이너화하여 실행시킵니다
       - name: docker run new container
-        run: sudo docker run --name ${{ secrets.APPLICATION_NAME }} --rm -d -p 8080:8080 ${{ secrets.DOCKERHUB_USERNAME }}/${{ secrets.APPLICATION_NAME }}
+        run: sudo docker run --name ${{ secrets.APPLICATION_NAME }} --rm -d -p 8080:8080 \
+          -e GOOGLE_APPLICATION_CREDENTIALS_JSON="$GCP_KEY_JSON" \
+          ${{ secrets.DOCKERHUB_USERNAME }}/${{ secrets.APPLICATION_NAME }}
 
       # 4. 미사용 이미지를 정리합니다
       - name: delete old docker image

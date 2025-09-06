@@ -34,7 +34,7 @@ public class User extends BaseEntity {
     private Role role;
 
     @Builder.Default
-    @Enumerated(EnumType.STRING) @Column(nullable=false)
+    @Column(name = "user_status", nullable = false)
     private UserStatus userStatus = UserStatus.ACTIVE;
 
     @OneToOne(mappedBy="user", cascade=CascadeType.ALL, orphanRemoval=true, fetch=FetchType.LAZY)
