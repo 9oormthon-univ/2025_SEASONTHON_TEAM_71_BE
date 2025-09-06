@@ -37,7 +37,7 @@ public class JobService {
                 .requirements(req.requirements())
                 .description(req.description())
                 .jobStatus("OPEN")
-                .deadline(req.deadline())
+                .deadline(String.valueOf(req.deadline()))
                 .build();
         jobs.save(j);
         return JobResponse.of(j);
@@ -68,7 +68,7 @@ public class JobService {
         if (req.requirements() != null) j.setRequirements(req.requirements());
         if (req.description() != null) j.setDescription(req.description());
         if (req.status() != null) j.setJobStatus(req.status());
-        if (req.deadline() != null) j.setDeadline(req.deadline());
+        if (req.deadline() != null) j.setDeadline(String.valueOf(req.deadline()));
 
         return JobResponse.of(j);
     }

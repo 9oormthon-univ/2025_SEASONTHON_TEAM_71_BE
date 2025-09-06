@@ -39,5 +39,5 @@ public class Job extends BaseEntity {
     @Column(name = "job_status")
     private String jobStatus = "OPEN"; // DRAFT, OPEN, CLOSED
 
-    private LocalDate deadline;
+    private String deadline;
 }

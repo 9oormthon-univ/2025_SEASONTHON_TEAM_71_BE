@@ -7,6 +7,7 @@ import java.time.LocalDate;
 public record JobResponse(
         Long id,
         Long companyId,
+        String companyName,
         String title,
         String employmentType,
         String location,
@@ -15,12 +16,13 @@ public record JobResponse(
         String requirements,
         String description,
         String status,
-        LocalDate deadline
+        String deadline
 ) {
     public static JobResponse of(Job j) {
         return new JobResponse(
                 j.getId(),
-                j.getCompany() != null ? j.getCompany().getId() : null,
+                j.getCompany().getId(),
+                j.getCompany().getName(),
                 j.getTitle(),
                 j.getEmploymentType(),
                 j.getLocation(),
