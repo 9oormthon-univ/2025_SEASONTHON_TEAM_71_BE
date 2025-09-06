@@ -45,22 +45,22 @@ public class File extends BaseEntity {
         this.fileUrl = fileUrl;
     }
 
-    // ⭐️ 연관관계 편의 메서드 추가: 키워드 리스트를 받아서 File에 추가
-    public void addKeywords(DocumentAiKeywordsResponse response) {
-        // 희망 직무 키워드 추가
-        response.preferredJob().forEach(keywordDto -> this.keywords.add(Keyword.builder()
-                .file(this) // 연관관계의 주인인 File 객체를 설정
-                .term(keywordDto.term())
-                .weight(keywordDto.weight())
-                .type(KeywordType.PREFERRED_JOB)
-                .build()));
-
-        // 기술 및 스펙 키워드 추가
-        response.skillsAndSpecs().forEach(keywordDto -> this.keywords.add(Keyword.builder()
-                .file(this) // 연관관계의 주인인 File 객체를 설정
-                .term(keywordDto.term())
-                .weight(keywordDto.weight())
-                .type(KeywordType.SKILL_AND_SPEC)
-                .build()));
-    }
+//    // ⭐️ 연관관계 편의 메서드 추가: 키워드 리스트를 받아서 File에 추가
+//    public void addKeywords(DocumentAiKeywordsResponse response) {
+//        // 희망 직무 키워드 추가
+//        response.preferredJob().forEach(keywordDto -> this.keywords.add(Keyword.builder()
+//                .file(this) // 연관관계의 주인인 File 객체를 설정
+//                .term(keywordDto.term())
+//                .weight(keywordDto.weight())
+//                .type(KeywordType.PREFERRED_JOB)
+//                .build()));
+//
+//        // 기술 및 스펙 키워드 추가
+//        response.skillsAndSpecs().forEach(keywordDto -> this.keywords.add(Keyword.builder()
+//                .file(this) // 연관관계의 주인인 File 객체를 설정
+//                .term(keywordDto.term())
+//                .weight(keywordDto.weight())
+//                .type(KeywordType.SKILL_AND_SPEC)
+//                .build()));
+//    }
 }

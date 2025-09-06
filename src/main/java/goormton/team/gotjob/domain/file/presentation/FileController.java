@@ -5,6 +5,7 @@ import com.amazonaws.services.s3.model.S3ObjectInputStream;
 import goormton.team.gotjob.domain.file.application.FileService;
 import goormton.team.gotjob.domain.file.dto.response.FileDownloadResponse;
 import goormton.team.gotjob.global.payload.ResponseCustom;
+import goormton.team.gotjob.global.security.JwtProperties;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -12,7 +13,9 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
@@ -27,6 +30,7 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 
 @Tag(name = "파일 관리 API", description = "유저가 이력서를 pdf 파일 형태로 업로드 및 다운로드하는 api입니다.")
+@Slf4j
 @RestController
 @RequestMapping("/api/file")
 @RequiredArgsConstructor
@@ -35,13 +39,12 @@ public class FileController {
     private final FileService fileService;
 
     @Operation(summary = "pdf 파일 형식의 이력서 업로드", description = "pdf 형식의 이력서 파일을 입력받아 AWS s3 버킷에 업로드합니다.")
-    @PostMapping("")
-    public ResponseCustom<?> uploadFile(@RequestParam("file") MultipartFile file) {
-
-//        Long currentUserId =
-
-        String fileUrl = fileService.uploadAndSaveFile(file);
-
+    @PostMapping()
+    public ResponseCustom<?> uploadFile(
+            @RequestParam("file") MultipartFile file,
+            @RequestHeader("Authorization") String token) {
+        log.info("JWT: {}", token);
+        String fileUrl = fileService.uploadAndSaveFile(file, token);
         return ResponseCustom.OK();
     }
 
@@ -61,10 +64,10 @@ public class FileController {
                     content = @Content)
     })
     @GetMapping("/{fileId}")
-    public ResponseEntity downloadFile(@PathVariable Long fileId) throws UnsupportedEncodingException {
+    public ResponseEntity downloadFile(@PathVariable Long fileId, @RequestHeader("Authorization") String token) throws UnsupportedEncodingException {
         try {
             // 1. FileService를 통해 파일 다운로드 정보 가져오기
-            FileDownloadResponse downloadDto = fileService.downloadFile(fileId);
+            FileDownloadResponse downloadDto = fileService.downloadFile(fileId, token);
 
             S3Object s3Object = downloadDto.s3Object();
             String originalFileName = downloadDto.originalFilename();

@@ -1,5 +1,6 @@
 package goormton.team.gotjob.domain.documentAi.dto.response;
 
+import goormton.team.gotjob.domain.keword.domain.Keyword;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.util.List;
@@ -9,11 +10,4 @@ public record DocumentAiKeywordsResponse(
         List<Keyword> preferredJob,
         List<Keyword> skillsAndSpecs
 ) {
-
-    public record Keyword(
-            String term,
-            int weight
-    ) {
-
-    }
 }

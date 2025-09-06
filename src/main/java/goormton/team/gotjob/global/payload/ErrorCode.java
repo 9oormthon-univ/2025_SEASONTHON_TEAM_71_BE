@@ -23,6 +23,7 @@ public enum ErrorCode {
     // JWT 토큰
     JWT_EXPIRED_ERROR(HttpStatus.BAD_REQUEST, null, "JWT 토큰이 만료되었습니다."),
     INVALID_JWT_ERROR(HttpStatus.BAD_REQUEST, null, "유효하지 않은 JWT 표현입니다."),
+    UNSUPPORTED_JWT_ERROR(HttpStatus.BAD_REQUEST, null, "지원하지 않는 JWT입니다."),
 
     // document ai Error
     INVALID_DOCUMENTAI_SUMMARY(HttpStatus.BAD_REQUEST, null, "요약이 정상적으로 이루어지지 않았습니다."),

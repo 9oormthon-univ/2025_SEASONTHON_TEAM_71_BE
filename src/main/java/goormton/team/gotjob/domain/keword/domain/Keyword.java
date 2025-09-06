@@ -27,7 +27,7 @@ public class Keyword extends BaseEntity {
     @Column(nullable = false)
     private KeywordType type; // 키워드 종류
 
-    @Builder
+    @Builder(toBuilder = true)
     public Keyword(File file, String term, int weight, KeywordType type) {
         this.file = file;
         this.term = term;
