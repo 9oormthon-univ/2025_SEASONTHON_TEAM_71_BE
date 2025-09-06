@@ -61,18 +61,18 @@ jobs:
 
       # 5. Docker Hub 이미지 푸시
       - name: docker Hub push
-        run: docker push ${{ secrets.DOCKERHUB_USERNAME }}/${{ secrets.APPLICATION_NAME }}
+        run: docker push ${{ secrets.DOCKERHUB_USERNAME }}/gotjob
 
   run-docker-image-on-ec2:
     needs: build-docker-image
     runs-on: self-hosted
-    env:
-      GCP_KEY_JSON: ${{ secrets.GCP_SA_KEY }}
+    # env:
+    #   GCP_KEY_JSON: ${{ secrets.GCP_SA_KEY }}
 
     steps:
       # 1. 최신 이미지를 풀받습니다
       - name: docker pull
-        run: sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/${{ secrets.APPLICATION_NAME }}
+        run: sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/gotjob
 
       # 2. 기존의 컨테이너를 중지시킵니다
       - name: docker stop container
@@ -80,10 +80,10 @@ jobs:
 
       # 3. 최신 이미지를 컨테이너화하여 실행시킵니다
       - name: docker run new container
-        run: sudo docker run --name ${{ secrets.APPLICATION_NAME }} --rm -d -p 8080:8080 \
+        run: sudo docker run --name gotjob --rm -d -p 8080:8080 \
           -v /home/ubuntu/gcp-credentials/gcp-key.json:/app/gcp-key.json \
           -e GOOGLE_APPLICATION_CREDENTIALS=/app/gcp-key.json \
-          ${{ secrets.DOCKERHUB_USERNAME }}/${{ secrets.APPLICATION_NAME }}
+          ${{ secrets.DOCKERHUB_USERNAME }}/gotjob
 
       # 4. 미사용 이미지를 정리합니다
       - name: delete old docker image
