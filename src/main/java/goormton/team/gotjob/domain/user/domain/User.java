@@ -2,6 +2,7 @@ package goormton.team.gotjob.domain.user.domain;
 
 
 import goormton.team.gotjob.domain.common.BaseEntity;
+import goormton.team.gotjob.domain.consultant.domain.Specialty;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -38,6 +39,9 @@ public class User extends BaseEntity {
 
     @OneToOne(mappedBy="user", cascade=CascadeType.ALL, orphanRemoval=true, fetch=FetchType.LAZY)
     private UserProfile profile;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    private Specialty specialty;
 
     public void attachProfile(UserProfile p){ this.profile=p; p.setUser(this); }
 

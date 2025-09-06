@@ -67,6 +67,9 @@ dependencies {
 
     // AWS S3 클라이언트 사용을 위한 SDK
     implementation 'com.amazonaws:aws-java-sdk-s3:1.12.782'
+
+    // 코사인 유사도 계산을 위한
+    implementation 'org.apache.commons:commons-text:1.10.0'
 }
 
 tasks.named('test') {
