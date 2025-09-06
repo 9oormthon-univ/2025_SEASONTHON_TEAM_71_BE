@@ -31,7 +31,8 @@ public enum ErrorCode {
     // File Upload
     INVALID_IMAGE_FORMAT(HttpStatus.BAD_REQUEST, null, "지원하지 않는 이미지 형식입니다."),
     INVALID_FILE_NAME(HttpStatus.BAD_REQUEST, null, "잘못된 파일명입니다."),
-    FILE_NOT_FOUND(HttpStatus.BAD_REQUEST, null, "해당 파일을 찾을 수 없습니다.")
+    FILE_NOT_FOUND(HttpStatus.NOT_FOUND, null, "해당 파일을 찾을 수 없습니다."),
+    FILE_DOWNLOAD_FAILED(HttpStatus.BAD_REQUEST, null, "해당 파일을 다운로드하는 데 실패했습니다.")
     ;
 
     private final HttpStatus httpStatus;

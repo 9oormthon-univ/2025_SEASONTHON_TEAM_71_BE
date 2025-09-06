@@ -10,10 +10,13 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 
@@ -36,27 +39,33 @@ public class FileController {
     }
 
     @GetMapping("/download/{fileId}")
-    public ResponseCustom<?> downloadFile(@PathVariable Long fileId) {
-        // 1. FileService를 통해 파일 다운로드 정보 가져오기
-        FileDownloadResponse downloadDto = fileService.downloadFile(fileId);
+    public ResponseEntity downloadFile(@PathVariable Long fileId) throws UnsupportedEncodingException {
+        try {
+            // 1. FileService를 통해 파일 다운로드 정보 가져오기
+            FileDownloadResponse downloadDto = fileService.downloadFile(fileId);
 
-        S3Object s3Object = downloadDto.s3Object();
-        String originalFileName = downloadDto.originalFilename();
+            S3Object s3Object = downloadDto.s3Object();
+            String originalFileName = downloadDto.originalFilename();
 
-        // 2. S3Object에서 InputStream 추출
-        S3ObjectInputStream inputStream = s3Object.getObjectContent();
-        Resource resource = new InputStreamResource(inputStream);
+            // 2. S3Object에서 InputStream 추출
+            S3ObjectInputStream inputStream = s3Object.getObjectContent();
+            Resource resource = new InputStreamResource(inputStream);
 
-        // 3. 다운로드될 파일 이름 인코딩 처리 (한글 등 깨짐 방지)
-        String encodedFileName = URLEncoder.encode(originalFileName, StandardCharsets.UTF_8.toString()).replaceAll("\\+", "%20");
+            // 3. 다운로드될 파일 이름 인코딩 처리 (한글 등 깨짐 방지)
+            String encodedFileName = URLEncoder.encode(originalFileName, StandardCharsets.UTF_8.toString()).replaceAll("\\+", "%20");
 
-        // 4. HTTP 응답 헤더 설정
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_OCTET_STREAM); // 일반적인 바이너리 파일 타입
-        headers.setContentDispositionFormData("attachment", encodedFileName); // attachment로 설정하여 다운로드 유도
+            // 4. HTTP 응답 헤더 설정
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_OCTET_STREAM); // 일반적인 바이너리 파일 타입
+            headers.setContentDispositionFormData("attachment", encodedFileName); // attachment로 설정하여 다운로드 유도
 
-        return ResponseCustom.OK()
-                .headers(headers)
-                .body(resource);
+            return ResponseEntity.ok()
+                    .headers(headers)
+                    .body(resource);
+        } catch (Exception e) {
+            // 파일 조회 실패 또는 다른 예외 처리
+            // 예: 로그를 남기고, 적절한 에러 응답을 반환
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        }
     }
 }

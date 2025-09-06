@@ -47,9 +47,9 @@ public class DocumentAiController {
             }),
             @ApiResponse(responseCode = "400", description = "실패")
     })
-    @PostMapping("/summary")
+    @PostMapping("/extract")
     public ResponseCustom<?> ExtractKeywords(@RequestBody DocumentAiRequest request) throws IOException {
-        List<DocumentAiKeywordsResponse> response = documentAiService.extractKeywardsWithWeights(request.resumeFile().getBytes());
+        DocumentAiKeywordsResponse response = documentAiService.extractKeywardsWithWeights(request.resumeFile().getBytes());
         return ResponseCustom.OK(response);
     }
 }
