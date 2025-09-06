@@ -8,10 +8,12 @@ import com.google.cloud.documentai.v1.ProcessRequest;
 import com.google.cloud.documentai.v1.ProcessResponse;
 import com.google.protobuf.ByteString;
 import goormton.team.gotjob.domain.documentAi.dto.response.DocumentAiKeywordsResponse;
-import goormton.team.gotjob.domain.documentAi.dto.response.DocumentAiKeywordsResponse.Keyword;
 import goormton.team.gotjob.domain.documentAi.dto.response.DocumentAiSummaryResponse;
 import goormton.team.gotjob.domain.file.domain.File;
 import goormton.team.gotjob.domain.file.domain.repository.FileRepository;
+import goormton.team.gotjob.domain.keword.domain.Keyword;
+import goormton.team.gotjob.domain.keword.domain.KeywordType;
+import goormton.team.gotjob.domain.keword.domain.repository.KeywordRepository;
 import goormton.team.gotjob.global.error.DefaultException;
 import goormton.team.gotjob.global.payload.ErrorCode;
 import goormton.team.gotjob.global.service.S3Service;
@@ -36,6 +38,7 @@ public class DocumentAiService {
 
     private final FileRepository fileRepository;
     private final DocumentProcessorServiceClient docAiClient;
+    private final KeywordRepository keywordRepository;
     private final S3Service s3Service;
 
     @Value("${gcp.project-id}")
@@ -130,33 +133,73 @@ public class DocumentAiService {
         ProcessResponse result = docAiClient.processDocument(request);
         Document resultDocument = result.getDocument();
 
-        // 각 라벨에 해당하는 Keyword 객체를 저장할 리스트 생성
-        List<Keyword> preferredJobs = new ArrayList<>();
-        List<Keyword> skillsAndSpecs = new ArrayList<>();
+        // 임시로 모든 키워드를 담을 리스트
+        List<Keyword> rawPreferredJobs = new ArrayList<>();
+        List<Keyword> rawSkillsAndSpecs = new ArrayList<>();
 
         // 추출된 엔티티(정보)들을 순회
         for (Document.Entity entity : resultDocument.getEntitiesList()) {
-            // 1. 키워드(term) 추출
             String term = entity.getMentionText();
-
-            // 2. 신뢰도 점수 추출 및 0~100 사이의 정수 가중치(weight)로 변환
             int weight = (int) (entity.getConfidence() * 100);
 
-            // 3. 각각의 키워드 저장
-            Keyword keyword = new Keyword(term, weight);
-
-            // 엔티티 타입에 따라 해당하는 리스트에 Keyword 객체 추가
+            // 엔티티 타입에 따라 해당하는 임시 리스트에 Keyword 객체 추가
             switch (entity.getType()) {
                 case "preferred_job":
-                    preferredJobs.add(keyword);
+                    rawPreferredJobs.add(Keyword.builder()
+                            .file(file)
+                            .type(KeywordType.PREFERRED_JOB)
+                            .term(term) // 원본 텍스트 저장
+                            .weight(weight)
+                            .build());
                     break;
                 case "skill_or_spec":
-                    skillsAndSpecs.add(keyword);
+                    rawSkillsAndSpecs.add(Keyword.builder()
+                            .file(file)
+                            .type(KeywordType.SKILL_AND_SPEC)
+                            .term(term) // 원본 텍스트 저장
+                            .weight(weight)
+                            .build());
                     break;
             }
         }
 
-        return new DocumentAiKeywordsResponse(preferredJobs, skillsAndSpecs);
+        // 정규화 및 중복 제거 로직 적용
+        List<Keyword> finalPreferredJobs = deduplicateAndNormalizeKeywords(rawPreferredJobs);
+        List<Keyword> finalSkillsAndSpecs = deduplicateAndNormalizeKeywords(rawSkillsAndSpecs);
+
+        List<Keyword> allKeywordsToSave = new ArrayList<>();
+        allKeywordsToSave.addAll(finalPreferredJobs);
+        allKeywordsToSave.addAll(finalSkillsAndSpecs);
+
+// 합쳐진 리스트를 saveAll 메소드에 단 한 번만 전달하여 저장합니다.
+        keywordRepository.saveAll(allKeywordsToSave);
+
+        return new DocumentAiKeywordsResponse(finalPreferredJobs, finalSkillsAndSpecs);
+    }
+
+    private List<Keyword> deduplicateAndNormalizeKeywords(List<Keyword> keywords) {
+        // Key: 정규화된 키워드 (대문자 + 공백제거), Value: Keyword 객체
+        Map<String, Keyword> uniqueKeywordsMap = new HashMap<>();
+
+        for (Keyword currentKeyword : keywords) {
+            // 1. 키워드 정규화: 모든 공백 제거 및 대문자 변환
+            String normalizedTerm = currentKeyword.getTerm().replaceAll("\\s+", "").toUpperCase();
+
+            // 2. 중복 검사
+            // 맵에 없거나, 있더라도 현재 키워드의 가중치(weight)가 더 높으면 맵에 추가/교체
+            if (!uniqueKeywordsMap.containsKey(normalizedTerm) ||
+                    uniqueKeywordsMap.get(normalizedTerm).getWeight() < currentKeyword.getWeight()) {
+
+                // 3. 원본 키워드의 term을 대문자로 통일
+                currentKeyword.toBuilder()
+                        .term(currentKeyword.getTerm().toUpperCase())
+                        .build();
+                uniqueKeywordsMap.put(normalizedTerm, currentKeyword);
+            }
+        }
+
+        // 맵의 값들(유니크한 Keyword 객체들)을 리스트로 변환하여 반환
+        return new ArrayList<>(uniqueKeywordsMap.values());
     }
 
     private byte[] s32byte(S3Object s3Object) {
