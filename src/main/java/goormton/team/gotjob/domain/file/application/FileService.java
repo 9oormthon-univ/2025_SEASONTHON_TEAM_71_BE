@@ -50,7 +50,7 @@ public class FileService {
 
         fileRepository.save(file);
 
-        documentAiService.extractKeywordsWithWeights(file.getId());
+        // documentAiService.extractKeywordsWithWeights(file.getId());
 
         return file.getFileUrl();
     }
