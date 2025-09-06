@@ -5,6 +5,12 @@ import com.amazonaws.services.s3.model.S3ObjectInputStream;
 import goormton.team.gotjob.domain.file.application.FileService;
 import goormton.team.gotjob.domain.file.dto.response.FileDownloadResponse;
 import goormton.team.gotjob.global.payload.ResponseCustom;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.InputStreamResource;
@@ -28,17 +34,33 @@ public class FileController {
 
     private final FileService fileService;
 
-    @PostMapping("/upload")
+    @Operation(summary = "pdf 파일 형식의 이력서 업로드", description = "pdf 형식의 이력서 파일을 입력받아 AWS s3 버킷에 업로드합니다.")
+    @PostMapping("")
     public ResponseCustom<?> uploadFile(@RequestParam("file") MultipartFile file) {
 
 //        Long currentUserId =
 
-//        String fileUrl = fileService.uploadAndSaveFile(file, );
+        String fileUrl = fileService.uploadAndSaveFile(file);
 
         return ResponseCustom.OK();
     }
 
-    @GetMapping("/download/{fileId}")
+    @Operation(summary = "pdf 파일 형식의 이력서 다운로드", description = "fileId를 통해 기존에 업로드해두었던 이력서 pdf 파일을 다운로드합니다.")
+    @Parameter(name = "fileId", description = "다운로드할 파일의 고유 ID", required = true)
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "파일 다운로드 성공",
+                    // 응답 본문이 어떤 형태인지 명시합니다. (바이너리 파일)
+                    content = @Content(mediaType = "application/octet-stream",
+                            schema = @Schema(type = "string", format = "binary"))),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "해당 파일을 찾을 수 없음",
+                    // 응답 본문이 없을 경우 @Content를 생략하거나, 에러 DTO 스키마를 명시할 수 있습니다.
+                    content = @Content)
+    })
+    @GetMapping("/{fileId}")
     public ResponseEntity downloadFile(@PathVariable Long fileId) throws UnsupportedEncodingException {
         try {
             // 1. FileService를 통해 파일 다운로드 정보 가져오기

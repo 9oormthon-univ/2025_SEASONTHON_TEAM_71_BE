@@ -4,8 +4,6 @@ import com.amazonaws.services.s3.AmazonS3Client;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.amazonaws.services.s3.model.S3Object;
-import com.amazonaws.services.s3.model.S3ObjectInputStream;
-import com.amazonaws.util.IOUtils;
 import goormton.team.gotjob.global.error.DefaultException;
 import goormton.team.gotjob.global.payload.ErrorCode;
 import lombok.AllArgsConstructor;
@@ -29,12 +27,11 @@ public class S3Service {
     @Value("${cloud.aws.s3.bucket}")
     private String bucket;
 
-    private static final List<String> ALLOWED_IMAGE_TYPES = Arrays.asList(
+    private static final List<String> ALLOWED_FILE_TYPES = Arrays.asList(
             "image/jpeg",
             "image/jpg",
             "image/png",
-            "image/heic",
-            "image/gif"
+            "application/pdf"
     );
 
     public S3UploadResult uploadFile(MultipartFile file) {
@@ -62,7 +59,7 @@ public class S3Service {
 
     private void validateImageFormat(MultipartFile file) {
         String contentType = file.getContentType();
-        if (contentType == null || !ALLOWED_IMAGE_TYPES.contains(contentType.toLowerCase())) {
+        if (contentType == null || !ALLOWED_FILE_TYPES.contains(contentType.toLowerCase())) {
             throw new DefaultException(ErrorCode.INVALID_IMAGE_FORMAT);
         }
     }
@@ -76,14 +73,8 @@ public class S3Service {
     }
 
     // S3 버킷으로부터 파일 다운로드
-    public byte[] downloadFile(String storedFileName) {
-        try {
-            S3Object s3Object = amazonS3Client.getObject(bucket, storedFileName);
-            S3ObjectInputStream inputStream = s3Object.getObjectContent();
-            return IOUtils.toByteArray(inputStream); // InputStream을 byte 배열로 변환
-        } catch (IOException e) {
-            throw new DefaultException(ErrorCode.FILE_DOWNLOAD_FAILED);
-        }
+    public S3Object downloadFile(String storedFileName) {
+        return amazonS3Client.getObject(bucket, storedFileName);
     }
 
     private String getFileExtension(String fileName) {

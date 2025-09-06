@@ -37,7 +37,6 @@ public class File extends BaseEntity {
     @OneToMany(mappedBy = "file", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Keyword> keywords = new ArrayList<>();
 
-
     @Builder
     public File(User user, String originalFileName, String storedFileName, String fileUrl) {
         this.user = user;

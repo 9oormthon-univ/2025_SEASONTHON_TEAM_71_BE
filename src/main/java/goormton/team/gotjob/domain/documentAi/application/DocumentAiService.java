@@ -1,5 +1,7 @@
 package goormton.team.gotjob.domain.documentAi.application;
 
+import com.amazonaws.services.s3.model.S3Object;
+import com.amazonaws.services.s3.model.S3ObjectInputStream;
 import com.google.cloud.documentai.v1.Document;
 import com.google.cloud.documentai.v1.DocumentProcessorServiceClient;
 import com.google.cloud.documentai.v1.ProcessRequest;
@@ -18,6 +20,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -73,7 +77,8 @@ public class DocumentAiService {
         File file = fileRepository.findById(fileId)
                 .orElseThrow(() -> new DefaultException(ErrorCode.FILE_NOT_FOUND));
 
-        byte[] fileData = s3Service.downloadFile(file.getStoredFileName());
+        S3Object s3Object = s3Service.downloadFile(file.getStoredFileName());
+        byte[] fileData = s32byte(s3Object);
 
         String processorName = String.format("projects/%s/locations/%s/processors/%s", projectId, location, summarizerId);
 
@@ -109,7 +114,9 @@ public class DocumentAiService {
         File file = fileRepository.findById(fileId)
                 .orElseThrow(() -> new DefaultException(ErrorCode.FILE_NOT_FOUND));
 
-        byte[] fileData = s3Service.downloadFile(file.getStoredFileName());
+        S3Object s3Object = s3Service.downloadFile(file.getStoredFileName());
+
+        byte[] fileData = s32byte(s3Object);
 
         String processorName = String.format("projects/%s/locations/%s/processors/%s", projectId, location, extractorId);
 
@@ -150,5 +157,21 @@ public class DocumentAiService {
         }
 
         return new DocumentAiKeywordsResponse(preferredJobs, skillsAndSpecs);
+    }
+
+    private byte[] s32byte(S3Object s3Object) {
+        byte[] fileData;
+        try (S3ObjectInputStream inputStream = s3Object.getObjectContent();
+             ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
+            byte[] buffer = new byte[1024];
+            int bytesRead;
+            while ((bytesRead = inputStream.read(buffer)) != -1) {
+                outputStream.write(buffer, 0, bytesRead);
+            }
+            return outputStream.toByteArray();
+        } catch (IOException e) {
+            // 파일 데이터를 읽는 중 오류 발생 시 예외 처리
+            throw new RuntimeException("Failed to read file data from S3", e);
+        }
     }
 }

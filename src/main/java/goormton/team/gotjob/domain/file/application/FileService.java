@@ -23,7 +23,7 @@ public class FileService {
 
     // S3 버킷에 파일 업로드
     @Transactional
-    public String uploadAndSaveFile(MultipartFile multipartFile, Long userId) {
+    public String uploadAndSaveFile(MultipartFile multipartFile) {
         S3Service.S3UploadResult uploadResult = s3Service.uploadFile(multipartFile);
 
         File file = File.builder()

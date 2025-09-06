@@ -1,7 +1,6 @@
 package goormton.team.gotjob.domain.documentAi.presentation;
 
 import goormton.team.gotjob.domain.documentAi.application.DocumentAiService;
-import goormton.team.gotjob.domain.documentAi.dto.request.DocumentAiRequest;
 import goormton.team.gotjob.domain.documentAi.dto.response.DocumentAiKeywordsResponse;
 import goormton.team.gotjob.domain.documentAi.dto.response.DocumentAiSummaryResponse;
 import goormton.team.gotjob.global.payload.ResponseCustom;
@@ -11,13 +10,12 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.io.IOException;
-import java.util.List;
 
 @Tag(name = "DocumentAI 서비스 호출 API", description = "유저가 pdf 파일 형태로 올린 이력서를 입력받아 요약 및 키워드 추출 등의 서비스를 실행하는 controller입니다.")
 @RestController
@@ -34,9 +32,9 @@ public class DocumentAiController {
             }),
             @ApiResponse(responseCode = "400", description = "실패")
     })
-    @PostMapping("/summary")
-    public ResponseCustom<?> summaryResume(@RequestBody DocumentAiRequest request) throws IOException {
-        DocumentAiSummaryResponse response = documentAiService.summarizeWithBuiltInProcessor(request.resumeFile().getBytes());
+    @GetMapping("/summary/{fileId}")
+    public ResponseCustom<?> summaryResume(@PathVariable Long fileId) throws IOException {
+        DocumentAiSummaryResponse response = documentAiService.summarizeWithBuiltInProcessor(fileId);
         return ResponseCustom.OK(response);
     }
 
@@ -47,9 +45,9 @@ public class DocumentAiController {
             }),
             @ApiResponse(responseCode = "400", description = "실패")
     })
-    @PostMapping("/extract")
-    public ResponseCustom<?> ExtractKeywords(@RequestBody DocumentAiRequest request) throws IOException {
-        DocumentAiKeywordsResponse response = documentAiService.extractKeywardsWithWeights(request.resumeFile().getBytes());
+    @GetMapping("/extract/{fileId}")
+    public ResponseCustom<?> ExtractKeywords(@PathVariable Long fileId) throws IOException {
+        DocumentAiKeywordsResponse response = documentAiService.extractKeywordsWithWeights(fileId);
         return ResponseCustom.OK(response);
     }
 }
