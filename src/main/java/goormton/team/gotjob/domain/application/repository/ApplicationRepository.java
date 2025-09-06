@@ -9,7 +9,5 @@ import java.util.List;
 import java.util.Optional;
 
 public interface ApplicationRepository extends JpaRepository<Application, Long> {
-    Optional<Application> findByUserAndJob(User user, Job job);
-    List<Application> findByUser(User user);
-    List<Application> findByJob(Job job);
+    boolean existsByUserIdAndJobId(Long userId, Long jobId);
 }

@@ -7,26 +7,37 @@ import lombok.*;
 
 import java.time.LocalDate;
 
-@Entity @Table(name="jobs")
-@AttributeOverride(name = "status", column = @Column(name = "row_status"))
-@Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
+@Entity
+@Getter @Setter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor @Builder
+@Table(name = "jobs")
 public class Job extends BaseEntity {
-    @Id @GeneratedValue(strategy=GenerationType.IDENTITY)
+
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(fetch=FetchType.LAZY) @JoinColumn(name="company_id")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "company_id")
     private Company company;
 
-    @Column(nullable=false) private String title;
-    private String employmentType;
+    @Column(nullable = false)
+    private String title;
+
+    private String employmentType; // FULLTIME, PARTTIME...
     private String location;
     private Integer minSalary;
     private Integer maxSalary;
-    @Lob private String requirements;
-    @Lob private String description;
+
+    @Lob
+    private String requirements;
+
+    @Lob
+    private String description;
 
     @Builder.Default
-    @Column(name = "status")
-    private String jobStatus = "OPEN";
+    @Column(name = "job_status")
+    private String jobStatus = "OPEN"; // DRAFT, OPEN, CLOSED
+
     private LocalDate deadline;
 }
