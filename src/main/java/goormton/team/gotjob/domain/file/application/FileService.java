@@ -2,7 +2,6 @@ package goormton.team.gotjob.domain.file.application;
 
 
 import com.amazonaws.services.s3.model.S3Object;
-import goormton.team.gotjob.domain.documentAi.application.DocumentAiService;
 import goormton.team.gotjob.domain.file.domain.File;
 import goormton.team.gotjob.domain.file.domain.repository.FileRepository;
 import goormton.team.gotjob.domain.file.dto.response.FileDownloadResponse;
@@ -10,7 +9,6 @@ import goormton.team.gotjob.domain.user.domain.User;
 import goormton.team.gotjob.domain.user.repository.UserRepository;
 import goormton.team.gotjob.global.error.DefaultException;
 import goormton.team.gotjob.global.payload.ErrorCode;
-import goormton.team.gotjob.global.security.JwtProperties;
 import goormton.team.gotjob.global.security.JwtTokenProvider;
 import goormton.team.gotjob.global.service.S3Service;
 import lombok.RequiredArgsConstructor;
@@ -28,7 +26,7 @@ public class FileService {
     private final S3Service s3Service;
     private final UserRepository userRepository;
     private final JwtTokenProvider jwtUtil;
-    private final DocumentAiService documentAiService;
+//    private final DocumentAiService documentAiService;
     private final FileRepository fileRepository;
 
     // S3 버킷에 파일 업로드
