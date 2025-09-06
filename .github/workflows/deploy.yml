@@ -82,7 +82,7 @@ jobs:
       - name: docker run new container
         run: sudo docker run --name ${{ secrets.APPLICATION_NAME }} --rm -d -p 8080:8080 \
           -v /home/ubuntu/gcp-credentials/gcp-key.json:/app/gcp-key.json \
-          -e GOOGLE_APPLICATION_CREDENTIALS_JSON=/app/gcp-key.json \
+          -e GOOGLE_APPLICATION_CREDENTIALS=/app/gcp-key.json \
           ${{ secrets.DOCKERHUB_USERNAME }}/${{ secrets.APPLICATION_NAME }}
 
       # 4. 미사용 이미지를 정리합니다
